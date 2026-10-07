@@ -38,7 +38,7 @@ jobs:
       - name: Build single EXE
         shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name TriAevumKOR --collect-all capstone --collect-all certifi --add-data ".build/triaevum_src;triaevum_src" .build/triaevum_kor_gui.py
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name TriAevumKOR --collect-all capstone --collect-all certifi --add-data ".build/triaevum_src/tools;tools" .build/triaevum_kor_gui.py
 
       - name: Create build info
         shell: pwsh
