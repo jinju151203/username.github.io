@@ -606,3 +606,5 @@ if __name__ == "__main__":
 # fresh-build-trigger
 
 # retest-trigger
+
+# final-selftest-trigger
