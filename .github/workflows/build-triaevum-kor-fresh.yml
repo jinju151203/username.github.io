@@ -31,8 +31,12 @@ jobs:
       - name: Run EXE self-test
         shell: pwsh
         run: |
-          & .\dist\TriAevumKOR-Fresh.exe --self-test
-          if ($LASTEXITCODE -ne 0) { throw "EXE self-test failed with exit code $LASTEXITCODE" }
+          $p = Start-Process -FilePath ".\dist\TriAevumKOR-Fresh.exe" -ArgumentList "--self-test" -Wait -PassThru
+          if ($p.ExitCode -ne 0) {
+            $log = Join-Path $env:LOCALAPPDATA "TriAevumKOR\TriAevumKOR-error.log"
+            if (Test-Path $log) { Get-Content $log }
+            throw "EXE self-test failed with exit code $($p.ExitCode)"
+          }
 
       - name: Write README
         shell: pwsh
