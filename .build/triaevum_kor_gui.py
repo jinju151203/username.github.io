@@ -30,10 +30,11 @@ UPSTREAM_COMMIT = "a9b447709d4405848d75352354891059cebb9ff8"
 
 def bundled_source_root() -> Path:
     if getattr(sys, "frozen", False):
-        base = Path(getattr(sys, "_MEIPASS"))
-    else:
-        base = Path(__file__).resolve().parent
-    return base / "triaevum_src"
+        # TriAevum's bundle_paths.distribution_root() resolves directly to
+        # sys._MEIPASS in a frozen build, so its public source tree must live
+        # at that same root (tools/..., runtime/..., etc.).
+        return Path(getattr(sys, "_MEIPASS")).resolve()
+    return (Path(__file__).resolve().parent / "triaevum_src").resolve()
 
 
 def default_data_root() -> Path:
@@ -403,6 +404,12 @@ class App(tk.Tk):
         self.progress.stop()
         self.status_var.set("오류")
         self.run_button.configure(state="normal")
+        try:
+            log_path = Path(sys.executable if getattr(sys, "frozen", False) else __file__).resolve().parent / "TriAevumKOR-error.log"
+            log_path.write_text(self.log_box.get("1.0", "end"), encoding="utf-8")
+            message = message + "\n\n오류 로그: " + str(log_path)
+        except Exception:
+            pass
         messagebox.showerror(APP_TITLE, message)
 
     def open_result(self):
