@@ -1,0 +1,60 @@
+name: Build TriAevum KOR Helper
+
+on:
+  push:
+    paths:
+      - ".build/triaevum_kor_gui.py"
+      - ".github/workflows/build-triaevum-kor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout helper source
+        uses: actions/checkout@v4
+
+      - name: Checkout TriAevum source
+        uses: actions/checkout@v4
+        with:
+          repository: coccofresco/TriAevum
+          ref: a9b447709d4405848d75352354891059cebb9ff8
+          path: .build/triaevum_src
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install build dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r .build/triaevum_src/tools/triaevum_release/requirements-forge-build.txt
+
+      - name: Build single EXE
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name TriAevumKOR --collect-all capstone --collect-all certifi --add-data ".build/triaevum_src;triaevum_src" .build/triaevum_kor_gui.py
+
+      - name: Create build info
+        shell: pwsh
+        run: |
+          "TriAevum KOR Helper" | Set-Content -Encoding UTF8 dist/README_KOR.txt
+          "Built from TriAevum commit a9b447709d4405848d75352354891059cebb9ff8" | Add-Content -Encoding UTF8 dist/README_KOR.txt
+          "Contains no ROM or Nintendo game data." | Add-Content -Encoding UTF8 dist/README_KOR.txt
+          "KOR Title ID: 000400000008F800" | Add-Content -Encoding UTF8 dist/README_KOR.txt
+          "Custom textures are prepared for the KOR Title ID." | Add-Content -Encoding UTF8 dist/README_KOR.txt
+          "IPS/address-based code mods still require KOR-specific porting." | Add-Content -Encoding UTF8 dist/README_KOR.txt
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: TriAevumKOR-Windows-x64
+          path: |
+            dist/TriAevumKOR.exe
+            dist/README_KOR.txt
+          if-no-files-found: error
